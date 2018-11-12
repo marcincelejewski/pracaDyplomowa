@@ -1,6 +1,6 @@
 #include "snakeboard.h"
 
-SnakeBoard::SnakeBoard(BaseSolver *bs, Snake *s, QWidget *parent) :
+SnakeBoard::SnakeBoard(BaseSolver *bs, Snake *s, std::string aiDesc, QWidget *parent) :
 	QGraphicsView(parent)
 {
 	graphics = new Graphics();
@@ -8,60 +8,38 @@ SnakeBoard::SnakeBoard(BaseSolver *bs, Snake *s, QWidget *parent) :
 	snake = s;
 	setFixedSize(static_cast<int>(SnakeBoard::boardPixelSize), static_cast<int>(SnakeBoard::boardPixelSize));
 	setFrameStyle(QFrame::Panel | QFrame::Plain);
-	setFocusPolicy(Qt::StrongFocus);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	initScene();
+	initLabels(aiDesc);
 }
 
 void SnakeBoard::initScene()
 {
 	scene = new QGraphicsScene();
-	scene->setSceneRect(0, 0, SnakeBoard::boardPixelSize, SnakeBoard::boardPixelSize);
+	scene->setSceneRect(0, -20, SnakeBoard::boardPixelSize, SnakeBoard::boardPixelSize);
 	QGraphicsPixmapItem *item = new QGraphicsPixmapItem();
 	item->setPixmap(QPixmap((graphics->getPath() + "bg.jpg").c_str()).scaled(static_cast<int>(SnakeBoard::boardPixelSize), static_cast<int>(SnakeBoard::boardPixelSize)));
 	scene->addItem(item);
 	setScene(scene);
 
 	drawLines();
+
+	paintSnake();
+	paintFood();
 }
 
-void SnakeBoard::paintSnakeNormalMove()
+void SnakeBoard::initLabels(std::string aiDesc)
 {
-	if (map.contains("tail") && map.contains("pre_tail") && map.contains("head"))
-	{
-		scene->removeItem(map["tail"]);
-		scene->removeItem(map["pre_tail"]);
-		scene->removeItem(map["head"]);
-	}
-
-	Direction tailDir = snake->getTailDirection();
-	paintSnakeHead(snake->head, snake->getHeadDirection());
-	paintSnakeTail(snake->tail, tailDir);
-
-	Node prev2tail = snake->getNode(snake->nodes.size() - 3);
-
-	paintSnakeBody(snake->prevTail, snake->prevTail.getDirection(prev2tail), snake->getNode(snake->nodes.size() - 2).getDirection(snake->tail));
-
-	//drukowanie szyi
+	lblAi = new QLabel(this);
+	lblAi->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+	lblAi->setText(aiDesc.c_str());
+	lblAi->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
 }
 
-void SnakeBoard::paintSnakeEatenFoodMove()
+void SnakeBoard::paintSnakeHead()
 {
-	if (map.contains("head"))
-	{
-		scene->removeItem(map["head"]);
-	}
-
-	Direction headDir = snake->getHeadDirection();
-	paintSnakeHead(snake->head, headDir);
-
-	Node nextHead = snake->getNode(1);
-	paintSnakeBody(nextHead, headDir, snake->getNode(2).getDirection(nextHead));
-}
-
-void SnakeBoard::paintSnakeHead(const Node &n, Direction dir)
-{
+	Direction dir = snake->getHeadDirection();
 	QGraphicsPixmapItem *tmp;
 	if (dir == NORTH)
 	{
@@ -83,10 +61,10 @@ void SnakeBoard::paintSnakeHead(const Node &n, Direction dir)
 	{
 		throw "Niedozwolony kierunek HEAD";
 	}
-	tmp->setPos(n.x * SnakeBoard::cellPixelSize, n.y * SnakeBoard::cellPixelSize);
+	tmp->setPos(snake->head.x * SnakeBoard::cellPixelSize, snake->head.y * SnakeBoard::cellPixelSize);
 	tmp->setScale(scaleRatio);
 	scene->addItem(tmp);
-	map["head"] = tmp;
+	list.append(tmp);
 }
 
 void SnakeBoard::paintSnakeBody(const Node &n, Direction dirP, Direction dirN)
@@ -123,11 +101,12 @@ void SnakeBoard::paintSnakeBody(const Node &n, Direction dirP, Direction dirN)
 	tmp->setPos(n.x * SnakeBoard::cellPixelSize, n.y * SnakeBoard::cellPixelSize);
 	tmp->setScale(scaleRatio);
 	scene->addItem(tmp);
-	map["pre_tail"] = tmp;
+	list.append(tmp);
 }
 
-void SnakeBoard::paintSnakeTail(const Node &n, Direction dir)
+void SnakeBoard::paintSnakeTail()
 {
+	Direction dir = snake->getTailDirection();
 	QGraphicsPixmapItem *tmp;
 	if (dir == NORTH)
 	{
@@ -149,18 +128,58 @@ void SnakeBoard::paintSnakeTail(const Node &n, Direction dir)
 	{
 		throw "Niedozwolony kierunek TAIL";
 	}
-	tmp->setPos(n.x * SnakeBoard::cellPixelSize, n.y * SnakeBoard::cellPixelSize);
+	tmp->setPos(snake->tail.x * SnakeBoard::cellPixelSize, snake->tail.y * SnakeBoard::cellPixelSize);
 	tmp->setScale(scaleRatio);
 	scene->addItem(tmp);
-	map["tail"] = tmp;
+	list.append(tmp);
 }
 
-void SnakeBoard::paintFood(const Node & n)
+void SnakeBoard::paintFood()
 {
-	QGraphicsPixmapItem *tmp = new QGraphicsPixmapItem(*(graphics->food));
-	tmp->setPos(n.x * SnakeBoard::cellPixelSize, n.y * SnakeBoard::cellPixelSize);
-	tmp->setScale(scaleRatio);
-	scene->addItem(tmp);
+	if (food)
+	{
+		scene->removeItem(food);
+	}
+	food = new QGraphicsPixmapItem(*(graphics->food));
+	food->setPos(snake->food.x * SnakeBoard::cellPixelSize, snake->food.y * SnakeBoard::cellPixelSize);
+	food->setScale(scaleRatio);
+	scene->addItem(food);
+}
+
+void SnakeBoard::paintSnake()
+{
+	for (auto l : list)
+	{
+		scene->removeItem(l);
+	}
+
+	size_t counter = 0;
+	for (auto node : snake->nodes)
+	{
+		if (node == snake->head)
+		{
+			paintSnakeHead();
+		}
+		else if (node == snake->tail)
+		{
+			paintSnakeTail();
+		}
+		else
+		{
+			paintSnakeBody(node, node.getDirection(snake->getNode(counter - 1)), node.getDirection(snake->getNode(counter + 1)));
+		}
+		counter++;
+	}
+}
+
+void SnakeBoard::paintGameOver()
+{
+	QPixmap pm = QPixmap((graphics->getPath() + "gameover.png").c_str());
+	QGraphicsPixmapItem *item = new QGraphicsPixmapItem();
+	item->setPixmap(pm);
+
+	item->setPos((scene->width() - pm.width()) / 2, (scene->height() - pm.height()) / 2);
+	scene->addItem(item);
 }
 
 void SnakeBoard::sleep()
@@ -170,9 +189,6 @@ void SnakeBoard::sleep()
 
 void SnakeBoard::play()
 {
-	paintSnakeNormalMove();
-	paintFood(snake->food);
-
 	Move move;
 	while (true)
 	{
@@ -186,15 +202,17 @@ void SnakeBoard::play()
 		{
 			if (move == COLLISION)
 			{
+				paintGameOver();
 				break;
 			}
 			else if (move == NORMAL)
 			{
-				paintSnakeNormalMove();
+				paintSnake();
 			}
 			else if (move == EATEN_FOOD)
 			{
-				paintSnakeEatenFoodMove();
+				paintSnake();
+				paintFood();
 			}
 		}
 		catch (const char *e) {

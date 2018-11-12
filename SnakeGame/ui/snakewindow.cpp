@@ -10,7 +10,7 @@ SnakeWindow::SnakeWindow()
 	Snake *snake = new Snake(Node(Snake::boardSize / 2, Snake::boardSize - 4), Node(Snake::boardSize / 2, Snake::boardSize - 3), Node(Snake::boardSize / 2, Snake::boardSize - 2), Node(Snake::boardSize / 2, 1));
 
 	BaseSolver * solver = new RandomSolver;
-	board = new SnakeBoard(solver, snake);
+	board = new SnakeBoard(solver, snake, "Algorytm Losowy");
 
 	QWidget *wdg = new QWidget(this);
 	QGridLayout *layout = new QGridLayout(wdg);
