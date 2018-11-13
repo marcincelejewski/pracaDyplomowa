@@ -1,23 +1,26 @@
 #include "snakeboard.h"
 
-SnakeBoard::SnakeBoard(BaseSolver *bs, Snake *s, std::string aiDesc, QWidget *parent) :
+SnakeBoard::SnakeBoard(BaseSolver *solver, Snake *snake, QWidget *parent) :
 	QGraphicsView(parent)
 {
 	graphics = new Graphics();
-	solver = bs;
-	snake = s;
+	this->solver = solver;
+	this->snake = snake;
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(reload()));
+	gameOver = false;
+
 	setFixedSize(static_cast<int>(SnakeBoard::boardPixelSize), static_cast<int>(SnakeBoard::boardPixelSize));
 	setFrameStyle(QFrame::Panel | QFrame::Plain);
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	initScene();
-	initLabels(aiDesc);
 }
 
 void SnakeBoard::initScene()
 {
-	scene = new QGraphicsScene();
-	scene->setSceneRect(0, -20, SnakeBoard::boardPixelSize, SnakeBoard::boardPixelSize);
+	scene = new QGraphicsScene(this);
+	scene->setSceneRect(0, 0, SnakeBoard::boardPixelSize, SnakeBoard::boardPixelSize);
 	QGraphicsPixmapItem *item = new QGraphicsPixmapItem();
 	item->setPixmap(QPixmap((graphics->getPath() + "bg.jpg").c_str()).scaled(static_cast<int>(SnakeBoard::boardPixelSize), static_cast<int>(SnakeBoard::boardPixelSize)));
 	scene->addItem(item);
@@ -27,14 +30,6 @@ void SnakeBoard::initScene()
 
 	paintSnake();
 	paintFood();
-}
-
-void SnakeBoard::initLabels(std::string aiDesc)
-{
-	lblAi = new QLabel(this);
-	lblAi->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-	lblAi->setText(aiDesc.c_str());
-	lblAi->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
 }
 
 void SnakeBoard::paintSnakeHead()
@@ -182,19 +177,19 @@ void SnakeBoard::paintGameOver()
 	scene->addItem(item);
 }
 
-void SnakeBoard::sleep()
+void SnakeBoard::sleep(size_t value)
 {
-	std::this_thread::sleep_for(std::chrono::milliseconds(SnakeBoard::sleepTime));
+	std::this_thread::sleep_for(std::chrono::milliseconds(value));
 }
 
 void SnakeBoard::play()
 {
+	timer->start(SnakeBoard::sleepTime / 10);
+	startGameTime();
 	Move move;
 	while (true)
 	{
-		QCoreApplication::processEvents();
-		scene->update();
-		sleep();
+		moveTime = std::chrono::high_resolution_clock::now();
 
 		move = solver->nextMove(snake);
 
@@ -202,6 +197,7 @@ void SnakeBoard::play()
 		{
 			if (move == COLLISION)
 			{
+				gameOver = true;
 				paintGameOver();
 				break;
 			}
@@ -219,7 +215,34 @@ void SnakeBoard::play()
 			qDebug(e);
 			break;
 		}
+
+		QCoreApplication::processEvents();
+		scene->update();
+
+		sleep(sleepTime - getMoveTime());
 	}
+}
+
+size_t SnakeBoard::getScore()
+{
+	return snake->score;
+}
+
+double SnakeBoard::getGameTime()
+{
+	std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - gameTime;
+	return elapsed.count();
+}
+
+double SnakeBoard::getMoveTime()
+{
+	std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - moveTime;
+	return elapsed.count() * 1000;
+}
+
+bool SnakeBoard::isGameOver()
+{
+	return gameOver;
 }
 
 void SnakeBoard::drawLines()
@@ -229,4 +252,24 @@ void SnakeBoard::drawLines()
 		scene->addLine(0, i * SnakeBoard::cellPixelSize, width(), i * SnakeBoard::cellPixelSize, Qt::DashLine);
 		scene->addLine(i * SnakeBoard::cellPixelSize, 0, i * SnakeBoard::cellPixelSize, height(), Qt::DashLine);
 	}
+}
+
+void SnakeBoard::reload()
+{
+	if (!gameOver)
+	{
+		if (getMoveTime() > sleepTime + 25)
+		{
+			exit(222);
+		}
+	}
+	else
+	{
+		timer->stop();
+	}
+}
+
+void SnakeBoard::startGameTime()
+{
+	gameTime = std::chrono::high_resolution_clock::now();
 }

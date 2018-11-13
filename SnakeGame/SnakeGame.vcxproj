@@ -115,9 +115,12 @@
   <ItemGroup>
     <ClCompile Include="ai\greedysolver.cpp" />
     <ClCompile Include="ai\randomsolver.cpp" />
+    <ClCompile Include="basesolver.cpp" />
+    <ClCompile Include="hamiltonsolver.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui\graphics.cpp" />
     <ClCompile Include="ui\snakeboard.cpp" />
+    <ClCompile Include="ui\mainwindow.cpp" />
     <ClCompile Include="ui\snakewindow.cpp" />
     <ClCompile Include="util\node.cpp" />
     <ClCompile Include="util\snake.cpp" />
@@ -132,10 +135,17 @@
     <ClInclude Include="ai\basesolver.h" />
     <ClInclude Include="ai\greedysolver.h" />
     <ClInclude Include="ai\randomsolver.h" />
+    <ClInclude Include="hamiltonsolver.h" />
     <ClInclude Include="ui\graphics.h" />
+    <QtMoc Include="ui\snakewindow.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
+    </QtMoc>
     <ClInclude Include="util\node.h" />
     <ClInclude Include="util\snake.h" />
-    <QtMoc Include="ui\snakewindow.h">
+    <QtMoc Include="ui\mainwindow.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">UNICODE;_UNICODE;WIN32;WIN64;QT_DLL;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB</Define>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>

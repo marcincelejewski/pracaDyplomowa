@@ -7,6 +7,10 @@
 #include <unordered_set>
 #include <random>
 #include <QtDebug>
+#include <limits.h>
+#include <set>
+#include <map>
+#include <chrono>
 
 struct pair_hash {
 	inline std::size_t operator()(const std::pair<std::size_t, std::size_t> & v) const {
@@ -36,6 +40,7 @@ public:
 	Node getNode(size_t index);
 	Direction getHeadDirection();
 	Direction getTailDirection();
+	void shortestPathToNode(std::list<Direction> & list, Node dest);
 	const Node& getNullNode();
 
 	Move move(Direction dir);
@@ -43,6 +48,7 @@ public:
 
 	void updateSet();
 	bool canMove(Direction dir);
+	bool canMove(std::pair<int, int> node, Direction dir);
 
 	Node head;
 	Node tail;

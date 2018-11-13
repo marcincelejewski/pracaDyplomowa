@@ -7,7 +7,6 @@ class RandomSolver : public BaseSolver
 {
 public:
 	virtual Move nextMove(Snake *snake) override;
-	RandomSolver();
 };
 
 #endif // RANDOMSOLVER_H

@@ -1,9 +1,8 @@
-#include "ui/snakewindow.h"
+#include "ui/mainwindow.h"
 #include "ui/snakeboard.h"
 
 #include <QApplication>
 #include <fstream>
-#include <sstream>
 
 size_t Snake::boardSize;
 size_t SnakeBoard::boardPixelSize;
@@ -32,7 +31,7 @@ void readConfig()
 				{
 					std::stringstream buf(line.substr(index + 1, line.length()));
 					buf >> value;
-					if (value > 5 && value < 25)
+					if (value >= 5 && value < 25)
 					{
 						Snake::boardSize = value;
 					}
@@ -99,7 +98,7 @@ int main(int argc, char *argv[])
 {
 	readConfig();
 	QApplication a(argc, argv);
-	SnakeWindow window;
+	MainWindow window;
 	window.show();
 	return a.exec();
 }

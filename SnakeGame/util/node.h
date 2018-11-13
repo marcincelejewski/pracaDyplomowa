@@ -13,9 +13,10 @@ enum Direction {
 class Node
 {
 public:
+	int x, y;
+
 	Node();
 	Node(int x, int y);
-	int x, y;
 	bool operator==(const Node& n);
 	Direction getDirection(const Node &neighbor);
 	std::string toString();

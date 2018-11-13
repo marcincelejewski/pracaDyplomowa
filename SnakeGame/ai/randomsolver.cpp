@@ -2,6 +2,7 @@
 
 Move RandomSolver::nextMove(Snake *snake)
 {
+	runClock();
 	std::vector<Direction> directions;
 
 	if (snake->canMove(NORTH))
@@ -30,8 +31,4 @@ Move RandomSolver::nextMove(Snake *snake)
 	{
 		return COLLISION;
 	}
-}
-
-RandomSolver::RandomSolver()
-{
 }

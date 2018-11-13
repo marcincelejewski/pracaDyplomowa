@@ -1,25 +1,37 @@
 #ifndef SNAKEWINDOW_H
 #define SNAKEWINDOW_H
 
-#include <QFrame>
-#include <QMainWindow>
+#include "ui/snakeboard.h"
+
 #include <QtWidgets>
+#include <sstream>
+#include <iomanip>
 
 class SnakeBoard;
 
-class SnakeWindow : public QMainWindow
+class SnakeWindow : public QFrame
 {
 	Q_OBJECT
 
 public:
-	SnakeWindow();
+	SnakeWindow(BaseSolver *solver, Snake *snake, std::string aiDesc);
+	void play();
+	void startTimer();
 
-private slots:
-	void handleButton();
+public slots:
+	void reload();
 
 private:
 	SnakeBoard *board;
-	QPushButton *btnStart;
+	QLabel* lblTimer;
+	QLabel* lblScore;
+	QLabel* lblAi;
+
+	QLabel* timerTxt;
+	QLabel* scoreTxt;
+	QLabel* aiTxt;
+
+	QTimer *timer;
 };
 
 #endif // SNAKEWINDOW_H

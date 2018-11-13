@@ -1,31 +1,84 @@
 #include "snakewindow.h"
-#include "ui/snakeboard.h"
-#include "ai/randomsolver.h"
 
-SnakeWindow::SnakeWindow()
+SnakeWindow::SnakeWindow(BaseSolver *solver, Snake *snake, std::string aiDesc)
 {
-	setWindowTitle(tr("Snake"));
-	btnStart = new QPushButton("Start");
+	setFrameStyle(QFrame::Panel | QFrame::Plain);
 
-	Snake *snake = new Snake(Node(Snake::boardSize / 2, Snake::boardSize - 4), Node(Snake::boardSize / 2, Snake::boardSize - 3), Node(Snake::boardSize / 2, Snake::boardSize - 2), Node(Snake::boardSize / 2, 1));
+	timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SLOT(reload()));
 
-	BaseSolver * solver = new RandomSolver;
-	board = new SnakeBoard(solver, snake, "Algorytm Losowy");
+	QFont font("Comic Sans MS", 14);
+	QGridLayout *layout = new QGridLayout;
 
-	QWidget *wdg = new QWidget(this);
-	QGridLayout *layout = new QGridLayout(wdg);
+	lblAi = new QLabel(this);
+	lblAi->setText("Algorytm:");
+	lblAi->setAlignment(Qt::AlignCenter | Qt::AlignRight);
+	lblAi->setFont(font);
+	layout->addWidget(lblAi, 0, 0, 1, 1);
 
-	layout->addWidget(btnStart);
-	layout->addWidget(board);
+	aiTxt = new QLabel(this);
+	aiTxt->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+	aiTxt->setText(aiDesc.c_str());
+	aiTxt->setAlignment(Qt::AlignCenter | Qt::AlignCenter);
+	aiTxt->setFont(font);
+	aiTxt->setMinimumWidth(70);
+	layout->addWidget(aiTxt, 0, 1, 1, 1);
 
-	wdg->setLayout(layout);
-	setCentralWidget(wdg);
+	lblScore = new QLabel(this);
+	lblScore->setText("Wynik:");
+	lblScore->setAlignment(Qt::AlignCenter | Qt::AlignRight);
+	lblScore->setFont(font);
+	layout->addWidget(lblScore, 0, 2, 1, 1);
 
-	connect(btnStart, SIGNAL(released()), this, SLOT(handleButton()));
+	scoreTxt = new QLabel(this);
+	scoreTxt->setText("0");
+	scoreTxt->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+	scoreTxt->setAlignment(Qt::AlignCenter | Qt::AlignCenter);
+	scoreTxt->setFont(font);
+	scoreTxt->setMinimumWidth(70);
+	layout->addWidget(scoreTxt, 0, 3, 1, 1);
+
+	lblTimer = new QLabel(this);
+	lblTimer->setText("Czas:");
+	lblTimer->setAlignment(Qt::AlignCenter | Qt::AlignRight);
+	lblTimer->setFont(font);
+	layout->addWidget(lblTimer, 0, 4, 1, 1);
+
+	timerTxt = new QLabel(this);
+	timerTxt->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+	timerTxt->setText("0");
+	timerTxt->setAlignment(Qt::AlignCenter | Qt::AlignCenter);
+	timerTxt->setFont(font);
+	timerTxt->setMinimumWidth(70);
+	layout->addWidget(timerTxt, 0, 5, 1, 1);
+
+	board = new SnakeBoard(solver, snake, this);
+	layout->addWidget(board, 1, 0, 1, 6);
+
+	setLayout(layout);
 }
 
-void SnakeWindow::handleButton()
+void SnakeWindow::play()
 {
-	btnStart->setVisible(false);
+	startTimer();
 	board->play();
+}
+
+void SnakeWindow::startTimer()
+{
+	timer->start(SnakeBoard::sleepTime);
+}
+
+void SnakeWindow::reload()
+{
+	if (board->isGameOver())
+	{
+		timer->stop();
+	}
+	else {
+		scoreTxt->setText(std::to_string(board->getScore()).c_str());
+		std::stringstream stream;
+		stream << std::fixed << std::setprecision(1) << board->getGameTime();
+		timerTxt->setText(stream.str().c_str());
+	}
 }
