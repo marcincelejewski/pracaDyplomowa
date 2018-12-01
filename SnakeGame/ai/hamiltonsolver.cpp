@@ -1,23 +1,22 @@
-#include "hamiltonsolver.h"
+#include "ai/hamiltonsolver.h"
 
 Move HamiltonSolver::nextMove(Snake * snake)
 {
-	std::list<Direction> list;
 	if (list.empty())
 	{
 		if (snake->head == home)
 		{
-			//podazaj sciezka hamiltona
+			snake->getSimplyHamiltonCycle(list);
 		}
 		else
 		{
 			snake->shortestPathToNode(list, home);
 		}
 	}
-	if (snake->canMove(list.back()))
+	if (snake->canMove(list.front()))
 	{
-		Move move = snake->move(list.back());
-		list.pop_back();
+		Move move = snake->move(list.front());
+		list.pop_front();
 		return move;
 	}
 	else

@@ -57,10 +57,7 @@
     <ClCompile Include="ui\snakewindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="hamiltonsolver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="basesolver.cpp">
+    <ClCompile Include="ai\hamiltonsolver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -102,7 +99,7 @@
     <ClInclude Include="util\snake.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hamiltonsolver.h">
+    <ClInclude Include="ai\hamiltonsolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

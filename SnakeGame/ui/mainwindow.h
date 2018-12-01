@@ -20,8 +20,11 @@ private slots:
 	void handleButton();
 
 private:
-	SnakeWindow *snakeWindow;
 	QPushButton *btnStart;
+	SnakeWindow *snakeWindowRandom;
+	SnakeWindow *snakeWindowHamilton;
+	QMenuBar *menu;
+
 protected:
 	void closeEvent(QCloseEvent *event);
 };

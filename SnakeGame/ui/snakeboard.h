@@ -25,22 +25,20 @@ public:
 	void paintSnake();
 	void paintGameOver();
 	void sleep(size_t value);
-	void play();
-	void startGameTime();
 	size_t getScore();
 	double getGameTime();
 	double getMoveTime();
 	bool isGameOver();
-
+	void play();
 	static size_t sleepTime;
 	static size_t boardPixelSize;
 	static size_t cellPixelSize;
 	static double scaleRatio;
-	std::chrono::high_resolution_clock::time_point gameTime;
+
 	std::chrono::high_resolution_clock::time_point moveTime;
 
 public slots:
-	void reload();
+	void checkTime();
 
 private:
 	QGraphicsScene *scene;

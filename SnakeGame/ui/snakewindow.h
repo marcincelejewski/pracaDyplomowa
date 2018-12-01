@@ -15,8 +15,8 @@ class SnakeWindow : public QFrame
 
 public:
 	SnakeWindow(BaseSolver *solver, Snake *snake, std::string aiDesc);
-	void play();
 	void startTimer();
+	void play();
 
 public slots:
 	void reload();

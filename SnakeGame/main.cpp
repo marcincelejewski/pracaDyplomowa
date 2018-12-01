@@ -4,16 +4,18 @@
 #include <QApplication>
 #include <fstream>
 
-size_t Snake::boardSize;
+size_t Snake::BOARD_SIZE;
 size_t SnakeBoard::boardPixelSize;
 size_t SnakeBoard::cellPixelSize;
-size_t SnakeBoard::sleepTime = 50;
+size_t SnakeBoard::sleepTime;
 double SnakeBoard::scaleRatio;
+std::string Snake::outFileName;
 
 static const std::string boardSizeName = "boardSize";
 static const std::string boardPixelSizeName = "boardPixelSize";
 static const std::string imagesSizeName = "imagesSize";
 static const std::string sleepTimeName = "sleepTime";
+static const std::string outFileName = "outFileName";
 
 void readConfig()
 {
@@ -33,13 +35,13 @@ void readConfig()
 					buf >> value;
 					if (value >= 5 && value < 25)
 					{
-						Snake::boardSize = value;
+						Snake::BOARD_SIZE = value;
 					}
 					else
 					{
-						Snake::boardSize = 10;
+						Snake::BOARD_SIZE = 10;
 					}
-					qInfo() << (boardSizeName + " = " + std::to_string(Snake::boardSize)).c_str();
+					qInfo() << (boardSizeName + " = " + std::to_string(Snake::BOARD_SIZE)).c_str();
 				}
 				else if (line.substr(0, index) == boardPixelSizeName)
 				{
@@ -79,14 +81,20 @@ void readConfig()
 					}
 					else
 					{
-						SnakeBoard::sleepTime = 500;
+						SnakeBoard::sleepTime = 150;
 					}
 					qInfo() << (sleepTimeName + " = " + std::to_string(SnakeBoard::sleepTime)).c_str();
+				}
+				else if (line.substr(0, index) == outFileName)
+				{
+					std::stringstream buf(line.substr(index + 1, line.length()));
+					buf >> Snake::outFileName;
+					qInfo() << (outFileName + " = " + Snake::outFileName).c_str();
 				}
 			}
 		}
 		file.close();
-		SnakeBoard::cellPixelSize = SnakeBoard::boardPixelSize / Snake::boardSize;
+		SnakeBoard::cellPixelSize = SnakeBoard::boardPixelSize / Snake::BOARD_SIZE;
 		qInfo() << ("cellPixelSize = " + std::to_string(SnakeBoard::cellPixelSize)).c_str();
 
 		SnakeBoard::scaleRatio = double(SnakeBoard::cellPixelSize) / double(imagesSize);

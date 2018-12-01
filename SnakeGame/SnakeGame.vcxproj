@@ -114,9 +114,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ai\greedysolver.cpp" />
+    <ClCompile Include="ai\hamiltonsolver.cpp" />
     <ClCompile Include="ai\randomsolver.cpp" />
-    <ClCompile Include="basesolver.cpp" />
-    <ClCompile Include="hamiltonsolver.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui\graphics.cpp" />
     <ClCompile Include="ui\snakeboard.cpp" />
@@ -134,8 +133,8 @@
   <ItemGroup>
     <ClInclude Include="ai\basesolver.h" />
     <ClInclude Include="ai\greedysolver.h" />
+    <ClInclude Include="ai\hamiltonsolver.h" />
     <ClInclude Include="ai\randomsolver.h" />
-    <ClInclude Include="hamiltonsolver.h" />
     <ClInclude Include="ui\graphics.h" />
     <QtMoc Include="ui\snakewindow.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName)\.;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>

@@ -7,7 +7,7 @@ SnakeBoard::SnakeBoard(BaseSolver *solver, Snake *snake, QWidget *parent) :
 	this->solver = solver;
 	this->snake = snake;
 	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(reload()));
+	connect(timer, SIGNAL(timeout()), this, SLOT(checkTime()));
 	gameOver = false;
 
 	setFixedSize(static_cast<int>(SnakeBoard::boardPixelSize), static_cast<int>(SnakeBoard::boardPixelSize));
@@ -147,6 +147,7 @@ void SnakeBoard::paintSnake()
 	{
 		scene->removeItem(l);
 	}
+	list.clear();
 
 	size_t counter = 0;
 	for (auto node : snake->nodes)
@@ -185,14 +186,13 @@ void SnakeBoard::sleep(size_t value)
 void SnakeBoard::play()
 {
 	timer->start(SnakeBoard::sleepTime / 10);
-	startGameTime();
+	snake->startTime();
 	Move move;
 	while (true)
 	{
 		moveTime = std::chrono::high_resolution_clock::now();
 
 		move = solver->nextMove(snake);
-
 		try
 		{
 			if (move == COLLISION)
@@ -230,7 +230,7 @@ size_t SnakeBoard::getScore()
 
 double SnakeBoard::getGameTime()
 {
-	std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - gameTime;
+	std::chrono::duration<double> elapsed = std::chrono::high_resolution_clock::now() - snake->time;
 	return elapsed.count();
 }
 
@@ -247,29 +247,26 @@ bool SnakeBoard::isGameOver()
 
 void SnakeBoard::drawLines()
 {
-	for (size_t i = 0; i < Snake::boardSize; i++)
+	for (size_t i = 0; i < Snake::BOARD_SIZE; i++)
 	{
 		scene->addLine(0, i * SnakeBoard::cellPixelSize, width(), i * SnakeBoard::cellPixelSize, Qt::DashLine);
 		scene->addLine(i * SnakeBoard::cellPixelSize, 0, i * SnakeBoard::cellPixelSize, height(), Qt::DashLine);
 	}
 }
 
-void SnakeBoard::reload()
+void SnakeBoard::checkTime()
 {
 	if (!gameOver)
 	{
 		if (getMoveTime() > sleepTime + 25)
 		{
-			exit(222);
+			qInfo() << "ZA D£UGO TO TRWA£O";
+			//make faster move
+			//exit(222);
 		}
 	}
 	else
 	{
 		timer->stop();
 	}
-}
-
-void SnakeBoard::startGameTime()
-{
-	gameTime = std::chrono::high_resolution_clock::now();
 }

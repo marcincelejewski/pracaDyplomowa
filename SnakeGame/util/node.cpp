@@ -35,7 +35,3 @@ Direction Node::getDirection(const Node &neighbor)
 		return SOUTH;
 	}
 }
-
-std::string Node::toString() {
-	return "(" + std::to_string(x) + "," + std::to_string(y) + ")";
-}
