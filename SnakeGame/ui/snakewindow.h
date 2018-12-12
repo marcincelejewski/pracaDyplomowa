@@ -14,7 +14,7 @@ class SnakeWindow : public QFrame
 	Q_OBJECT
 
 public:
-	SnakeWindow(BaseSolver *solver, Snake *snake, std::string aiDesc);
+	SnakeWindow(BaseSolver *solver, Snake *snake, const std::string &aiDesc);
 	void startTimer();
 	void play();
 
@@ -29,7 +29,6 @@ private:
 
 	QLabel* timerTxt;
 	QLabel* scoreTxt;
-	QLabel* aiTxt;
 
 	QTimer *timer;
 };

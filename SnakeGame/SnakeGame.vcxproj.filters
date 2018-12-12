@@ -45,9 +45,6 @@
     <ClCompile Include="ui\snakeboard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="util\node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="util\snake.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -58,6 +55,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ai\hamiltonsolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ai\astarsolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -93,18 +96,22 @@
     <ClInclude Include="ui\graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="util\node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="util\snake.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ai\hamiltonsolver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ai\astarsolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.properties" />
     <None Include="README.md" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

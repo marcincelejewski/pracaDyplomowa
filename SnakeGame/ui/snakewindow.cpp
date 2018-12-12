@@ -1,6 +1,6 @@
 #include "snakewindow.h"
 
-SnakeWindow::SnakeWindow(BaseSolver *solver, Snake *snake, std::string aiDesc)
+SnakeWindow::SnakeWindow(BaseSolver *solver, Snake *snake, const std::string &aiDesc)
 {
 	setFrameStyle(QFrame::Panel | QFrame::Plain);
 
@@ -11,18 +11,11 @@ SnakeWindow::SnakeWindow(BaseSolver *solver, Snake *snake, std::string aiDesc)
 	QGridLayout *layout = new QGridLayout;
 
 	lblAi = new QLabel(this);
-	lblAi->setText("Algorytm:");
-	lblAi->setAlignment(Qt::AlignCenter | Qt::AlignRight);
+	lblAi->setText(aiDesc.c_str());
+	lblAi->setAlignment(Qt::AlignLeft | Qt::AlignLeft);
 	lblAi->setFont(font);
+	lblAi->setMinimumWidth(70);
 	layout->addWidget(lblAi, 0, 0, 1, 1);
-
-	aiTxt = new QLabel(this);
-	aiTxt->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-	aiTxt->setText(aiDesc.c_str());
-	aiTxt->setAlignment(Qt::AlignCenter | Qt::AlignCenter);
-	aiTxt->setFont(font);
-	aiTxt->setMinimumWidth(70);
-	layout->addWidget(aiTxt, 0, 1, 1, 1);
 
 	lblScore = new QLabel(this);
 	lblScore->setText("Wynik:");
@@ -66,7 +59,7 @@ void SnakeWindow::play()
 
 void SnakeWindow::startTimer()
 {
-	timer->start(SnakeBoard::sleepTime);
+	timer->start(SnakeBoard::sleepTime / 4);
 }
 
 void SnakeWindow::reload()

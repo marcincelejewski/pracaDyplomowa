@@ -56,13 +56,13 @@ void SnakeBoard::paintSnakeHead()
 	{
 		throw "Niedozwolony kierunek HEAD";
 	}
-	tmp->setPos(snake->head.x * SnakeBoard::cellPixelSize, snake->head.y * SnakeBoard::cellPixelSize);
+	tmp->setPos(snake->head.first * SnakeBoard::cellPixelSize, snake->head.second * SnakeBoard::cellPixelSize);
 	tmp->setScale(scaleRatio);
 	scene->addItem(tmp);
 	list.append(tmp);
 }
 
-void SnakeBoard::paintSnakeBody(const Node &n, Direction dirP, Direction dirN)
+void SnakeBoard::paintSnakeBody(const Node &n, const Direction &dirP, const Direction &dirN)
 {
 	QGraphicsPixmapItem *tmp;
 	if ((dirP == NORTH && dirN == SOUTH) || (dirN == NORTH && dirP == SOUTH))
@@ -93,7 +93,7 @@ void SnakeBoard::paintSnakeBody(const Node &n, Direction dirP, Direction dirN)
 	{
 		throw "Niedozwolony kierunek BODY";
 	}
-	tmp->setPos(n.x * SnakeBoard::cellPixelSize, n.y * SnakeBoard::cellPixelSize);
+	tmp->setPos(n.first * SnakeBoard::cellPixelSize, n.second * SnakeBoard::cellPixelSize);
 	tmp->setScale(scaleRatio);
 	scene->addItem(tmp);
 	list.append(tmp);
@@ -123,7 +123,7 @@ void SnakeBoard::paintSnakeTail()
 	{
 		throw "Niedozwolony kierunek TAIL";
 	}
-	tmp->setPos(snake->tail.x * SnakeBoard::cellPixelSize, snake->tail.y * SnakeBoard::cellPixelSize);
+	tmp->setPos(snake->tail.first * SnakeBoard::cellPixelSize, snake->tail.second * SnakeBoard::cellPixelSize);
 	tmp->setScale(scaleRatio);
 	scene->addItem(tmp);
 	list.append(tmp);
@@ -136,7 +136,7 @@ void SnakeBoard::paintFood()
 		scene->removeItem(food);
 	}
 	food = new QGraphicsPixmapItem(*(graphics->food));
-	food->setPos(snake->food.x * SnakeBoard::cellPixelSize, snake->food.y * SnakeBoard::cellPixelSize);
+	food->setPos(snake->food.first * SnakeBoard::cellPixelSize, snake->food.second * SnakeBoard::cellPixelSize);
 	food->setScale(scaleRatio);
 	scene->addItem(food);
 }
@@ -162,7 +162,7 @@ void SnakeBoard::paintSnake()
 		}
 		else
 		{
-			paintSnakeBody(node, node.getDirection(snake->getNode(counter - 1)), node.getDirection(snake->getNode(counter + 1)));
+			paintSnakeBody(node, getDirection(node, snake->getNode(counter - 1)), getDirection(node, snake->getNode(counter + 1)));
 		}
 		counter++;
 	}
@@ -170,11 +170,12 @@ void SnakeBoard::paintSnake()
 
 void SnakeBoard::paintGameOver()
 {
-	QPixmap pm = QPixmap((graphics->getPath() + "gameover.png").c_str());
+	QPixmap pm = QPixmap((graphics->getPath() + "gameover.png").c_str()).scaled(static_cast<int>(SnakeBoard::boardPixelSize), static_cast<int>(SnakeBoard::boardPixelSize));
 	QGraphicsPixmapItem *item = new QGraphicsPixmapItem();
 	item->setPixmap(pm);
 
 	item->setPos((scene->width() - pm.width()) / 2, (scene->height() - pm.height()) / 2);
+	item->scale();
 	scene->addItem(item);
 }
 
@@ -258,9 +259,9 @@ void SnakeBoard::checkTime()
 {
 	if (!gameOver)
 	{
-		if (getMoveTime() > sleepTime + 25)
+		if (getMoveTime() > sleepTime + 10)
 		{
-			qInfo() << "ZA D£UGO TO TRWA£O";
+			qInfo() << "ZA DLUGO TO TRWALO";
 			//make faster move
 			//exit(222);
 		}

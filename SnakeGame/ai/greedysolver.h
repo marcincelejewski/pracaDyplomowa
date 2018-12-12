@@ -2,10 +2,14 @@
 #define GREEDYSOLVER_H
 
 #include "basesolver.h"
-class GreedySolver
+class GreedySolver : public BaseSolver
 {
 public:
-	GreedySolver();
+	GreedySolver() {};
+	~GreedySolver() {};
+	virtual Move nextMove(Snake *snake) override;
+
+	Direction greedy(Snake snake, const Node &dest);
 };
 
 #endif // GREEDYSOLVER_H

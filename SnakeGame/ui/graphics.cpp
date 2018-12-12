@@ -5,11 +5,13 @@ Graphics::Graphics()
 {
 	readGraphics();
 }
+
 const std::string& Graphics::getPath()
 {
 	static std::string path("../SnakeGame/images/");
 	return path;
 }
+
 void Graphics::readGraphics() {
 	//food
 	food = new QPixmap(QPixmap((getPath() + "food.png").c_str()));

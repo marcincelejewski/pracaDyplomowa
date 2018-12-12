@@ -21,9 +21,10 @@ private slots:
 
 private:
 	QPushButton *btnStart;
-	SnakeWindow *snakeWindowRandom;
+	SnakeWindow *snakeWindowGreedy;
+	SnakeWindow *snakeWindowAstar;
 	SnakeWindow *snakeWindowHamilton;
-	QMenuBar *menu;
+	SnakeWindow *snakeWindowRandom;
 
 protected:
 	void closeEvent(QCloseEvent *event);

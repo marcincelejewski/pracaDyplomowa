@@ -33,7 +33,7 @@ void readConfig()
 				{
 					std::stringstream buf(line.substr(index + 1, line.length()));
 					buf >> value;
-					if (value >= 5 && value < 25)
+					if (value >= 5 && value <= 25)
 					{
 						Snake::BOARD_SIZE = value;
 					}
@@ -53,7 +53,7 @@ void readConfig()
 					}
 					else
 					{
-						SnakeBoard::boardPixelSize = 600;
+						SnakeBoard::boardPixelSize = 500;
 					}
 					qInfo() << (boardPixelSizeName + " = " + std::to_string(SnakeBoard::boardPixelSize)).c_str();
 				}
@@ -108,5 +108,6 @@ int main(int argc, char *argv[])
 	QApplication a(argc, argv);
 	MainWindow window;
 	window.show();
+
 	return a.exec();
 }

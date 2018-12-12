@@ -18,7 +18,7 @@ public:
 	SnakeBoard(BaseSolver *solver, Snake *snake, QWidget *parent = nullptr);
 	void initScene();
 	void drawLines();
-	void paintSnakeBody(const Node &n, Direction dirP, Direction dirN);
+	void paintSnakeBody(const Node &n, const Direction &dirP, const Direction &dirN);
 	void paintSnakeHead();
 	void paintSnakeTail();
 	void paintFood();

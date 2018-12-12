@@ -1,24 +1,20 @@
-#ifndef NODE_H
-#define NODE_H
+#ifndef node_h
+#define node_h
 
-#include <string>
+#include <utility>
 
 enum Direction {
 	NORTH,
 	SOUTH,
 	EAST,
-	WEST
+	WEST,
+	ERROR_DIRECTION
 };
 
-class Node
-{
-public:
-	int x, y;
+using Node = std::pair<int, int>;
 
-	Node();
-	Node(int x, int y);
-	bool operator==(const Node& n);
-	Direction getDirection(const Node &neighbor);
-};
+Direction getDirection(const Node & node, const Node &neighbor);
+int manhattanDistance(const Node &a, const Node &b);
+Node getNeighbor(const Node &node, const Direction &dir);
 
-#endif // NODE_H
+#endif

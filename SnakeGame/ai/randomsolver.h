@@ -6,6 +6,9 @@
 class RandomSolver : public BaseSolver
 {
 public:
+	RandomSolver() {};
+	~RandomSolver() {};
+
 	virtual Move nextMove(Snake *snake) override;
 };
 

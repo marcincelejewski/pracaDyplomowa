@@ -7,6 +7,7 @@ class BaseSolver
 {
 public:
 	virtual Move nextMove(Snake *snake) = 0;
+	virtual ~BaseSolver() {};
 };
 
 #endif // BASESOLVER_H

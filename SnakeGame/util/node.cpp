@@ -1,37 +1,49 @@
 #include "node.h"
 
-Node::Node(int x, int y)
+Direction getDirection(const Node & node, const Node &neighbor)
 {
-	this->x = x;
-	this->y = y;
-}
-Node::Node() {}
-
-bool Node::operator==(const Node& node)
-{
-	if (this->x == node.x && this->y == node.y)
-	{
-		return true;
-	}
-	return false;
-}
-
-Direction Node::getDirection(const Node &neighbor)
-{
-	if (neighbor.x > this->x)
+	if (neighbor.first > node.first)
 	{
 		return EAST;
 	}
-	else if (neighbor.x < this->x)
+	else if (neighbor.first < node.first)
 	{
 		return WEST;
 	}
-	else if (neighbor.y < this->y)
+	else if (neighbor.second < node.second)
 	{
 		return NORTH;
 	}
-	else if (neighbor.y > this->y)
+	else if (neighbor.second > node.second)
 	{
 		return SOUTH;
 	}
+	return ERROR_DIRECTION;
+}
+
+int manhattanDistance(const Node &a, const Node &b)
+{
+	return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+}
+
+Node getNeighbor(const Node &node, const Direction &dir)
+{
+	Node n;
+	if (dir == NORTH)
+	{
+		n = Node(node.first, node.second - 1);
+	}
+	else if (dir == SOUTH)
+	{
+		n = Node(node.first, node.second + 1);
+	}
+	else if (dir == WEST)
+	{
+		n = Node(node.first - 1, node.second);
+	}
+	else if (dir == EAST)
+	{
+		n = Node(node.first + 1, node.second);
+	}
+	return n;
 }

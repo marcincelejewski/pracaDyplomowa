@@ -58,6 +58,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeaderFile />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -89,6 +90,7 @@
       <DebugInformationFormat />
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeaderFile />
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -113,6 +115,7 @@
     </QtRcc>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ai\astarsolver.cpp" />
     <ClCompile Include="ai\greedysolver.cpp" />
     <ClCompile Include="ai\hamiltonsolver.cpp" />
     <ClCompile Include="ai\randomsolver.cpp" />
@@ -131,6 +134,7 @@
     <ResourceCompile Include="SnakeGame.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ai\astarsolver.h" />
     <ClInclude Include="ai\basesolver.h" />
     <ClInclude Include="ai\greedysolver.h" />
     <ClInclude Include="ai\hamiltonsolver.h" />
@@ -159,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config.properties" />
+    <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -166,10 +171,17 @@
     <Import Project="$(QtMsBuild)\qt.targets" />
   </ImportGroup>
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\boost.1.68.0.0\build\boost.targets" Condition="Exists('..\packages\boost.1.68.0.0\build\boost.targets')" />
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" lupdateOptions="" lupdateOnBuild="0" lreleaseOptions="" Qt5Version_x0020_x64="vs2017" MocOptions="" />
     </VisualStudio>
   </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Ten projekt zawiera odwołania do pakietów NuGet, których nie ma na tym komputerze. Użyj przywracania pakietów NuGet, aby je pobrać. Aby uzyskać więcej informacji, zobacz http://go.microsoft.com/fwlink/?LinkID=322105. Brakujący plik: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\boost.1.68.0.0\build\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\boost.1.68.0.0\build\boost.targets'))" />
+  </Target>
 </Project>

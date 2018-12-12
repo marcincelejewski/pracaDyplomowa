@@ -5,186 +5,226 @@ std::string timeToString(std::chrono::high_resolution_clock::time_point start, s
 	return std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(finish - start).count());
 }
 
-Snake::Snake(Node first, Node last, Node tail, Node food)
+Snake::Snake(Node head, Node prevTail, Node tail, Node food)
 {
-	this->head = first;
-	this->prevTail = last;
+	this->head = head;
+	this->prevTail = prevTail;
 	this->tail = tail;
 	this->food = food;
-	nodes.push_back(first);
-	nodes.push_back(last);
-	nodes.push_back(tail);
-	score = 0;
-	movementCounter = 0;
-	updateSet();
+	this->nodes.push_back(head);
+	this->nodes.push_back(prevTail);
+	this->nodes.push_back(tail);
+	this->score = 0;
+	this->movementCounter = 0;
+	this->updateSet();
 }
 
-Node Snake::getNode(size_t index)
+Snake::Snake(const Snake & snake)
+{
+	this->head = snake.head;
+	this->prevTail = snake.prevTail;
+	this->tail = snake.tail;
+	this->food = snake.food;
+
+	this->score = snake.score;
+	this->movementCounter = snake.movementCounter;
+
+	this->nodes = snake.nodes;
+	this->set = snake.set;
+}
+
+Node Snake::getNode(const size_t &index)
 {
 	if (index < nodes.size() && index >= 0)
 		return nodes.at(index);
-	return getNullNode();
+	return Node(-1, -1);
 }
 
-//nieu¿ywane
 Direction Snake::getHeadDirection()
 {
-	return getNode(1).getDirection(head);
+	return getDirection(getNode(1), head);
 }
-//nieu¿ywane
+
 Direction Snake::getTailDirection()
 {
-	return tail.getDirection(getNode(nodes.size() - 2));
+	return getDirection(tail, getNode(nodes.size() - 2));
 }
 
-void Snake::shortestPathToNode(std::list<Direction>& list, Node dest)
+Direction Snake::randomMove(const Node & node)
 {
-	if (!(head == dest))
+	std::vector<Direction> tmp;
+	if (canMove(getNeighbor(node, NORTH)))
 	{
-		//set			distance,	node(x,y)
-		std::set<std::pair<int, std::pair<int, int>>> setds;
+		tmp.push_back(NORTH);
+	}
+	if (canMove(getNeighbor(node, SOUTH)))
+	{
+		tmp.push_back(SOUTH);
+	}
+	if (canMove(getNeighbor(node, WEST)))
+	{
+		tmp.push_back(WEST);
+	}
+	if (canMove(getNeighbor(node, EAST)))
+	{
+		tmp.push_back(EAST);
+	}
+	if (tmp.size() > 0)
+	{
+		return tmp.at(random(0, tmp.size()));
+	}
+	return ERROR_DIRECTION;
+}
 
-		//map of predecessors node(x, y)
-		std::map<std::pair<int, int>, std::pair<int, int>> pred;
+Direction Snake::moveAway(const Node & from, const Node & dest)
+{
+	std::vector<std::pair<Node, int>> tmp;
+	Node north = getNeighbor(from, NORTH);
+	Node south = getNeighbor(from, SOUTH);
+	Node west = getNeighbor(from, WEST);
+	Node east = getNeighbor(from, EAST);
 
-		//map of distance to node(x, y), distance
-		std::map<std::pair<int, int>, int> dist;
-		for (int i = 0; i < BOARD_SIZE; i++)
+	if (canMove(north))
+	{
+		tmp.push_back(std::make_pair(north, -1));
+	}
+	if (canMove(south))
+	{
+		tmp.push_back(std::make_pair(south, -1));
+	}
+	if (canMove(west))
+	{
+		tmp.push_back(std::make_pair(west, -1));
+	}
+	if (canMove(east))
+	{
+		tmp.push_back(std::make_pair(east, -1));
+	}
+
+	for (auto &node : tmp)
+	{
+		node.second = moveCloser(node.first, dest).second;
+	}
+
+	std::vector<Node> nodes;
+	int max = -1;
+	for (auto it = tmp.begin(); it != tmp.end(); it++)
+	{
+		if (it->second >= max)
 		{
-			for (int j = 0; j < BOARD_SIZE; j++)
+			if (it->second > max)
 			{
-				dist[std::make_pair(i, j)] = INT_MAX;
-				pred[std::make_pair(i, j)] = std::make_pair(-1, -1);
+				max = it->second;
+				nodes.clear();
 			}
-		}
-		//map of nodes, from node(x,y)	to list his neighbor nodes(x,y) distance
-		std::map<std::pair<int, int>, std::list<std::pair<std::pair<int, int>, int>>> map;
-		for (int i = 0; i < BOARD_SIZE; i++)
-		{
-			for (int j = 0; j < BOARD_SIZE; j++)
-			{
-				if (canMove(std::make_pair(i, j), NORTH))
-				{
-					map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i, j - 1), 1));
-				}
-				if (canMove(std::make_pair(i, j), SOUTH))
-				{
-					map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i, j + 1), 1));
-				}
-				if (canMove(std::make_pair(i, j), EAST))
-				{
-					map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i + 1, j), 1));
-				}
-				if (canMove(std::make_pair(i, j), WEST))
-				{
-					map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i - 1, j), 1));
-				}
-			}
-		}
-
-		setds.insert(std::make_pair(0, std::make_pair(head.x, head.y)));
-		dist[std::make_pair(head.x, head.y)] = 0;
-
-		while (!setds.empty())
-		{
-			std::pair<int, std::pair<int, int>> tmp = *(setds.begin());
-			setds.erase(setds.begin());
-
-			std::pair<int, int> u = tmp.second;
-
-			std::list< std::pair<std::pair<int, int>, int>>::iterator i;
-			for (i = map[u].begin(); i != map[u].end(); ++i)
-			{
-				std::pair<int, int> v = (*i).first;
-				int weight = (*i).second;
-
-				if (dist[v] > dist[u] + weight)
-				{
-					if (dist[v] != INT_MAX)
-					{
-						setds.erase(setds.find(std::make_pair(dist[v], v)));
-					}
-					dist[v] = dist[u] + weight;
-					pred[v] = u;
-					setds.insert(std::make_pair(dist[v], v));
-				}
-			}
-		}
-
-		Node n = dest;
-		Node prev;
-		while (true)
-		{
-			prev = Node(pred[std::make_pair(n.x, n.y)].first, pred[std::make_pair(n.x, n.y)].second);
-			if (prev.x == -1 || prev.y == -1)
-			{
-				break;
-			}
-			list.push_front(prev.getDirection(n));
-			n = prev;
+			nodes.push_back(it->first);
 		}
 	}
+	if (nodes.size() > 0)
+	{
+		Node node = nodes.at(random(0, nodes.size()));
+		return getDirection(from, node);
+	}
+	return ERROR_DIRECTION;
 }
 
-void Snake::getSimplyHamiltonCycle(std::list<Direction>& list)
+std::pair<Direction, int> Snake::moveCloser(const Node &from, const Node &dest)
 {
-	addDirectionsToList(list, EAST, BOARD_SIZE - 1);
-	addDirectionsToList(list, SOUTH, BOARD_SIZE - 1);
+	//set			distance,	node(x,y)
+	std::set<std::pair<int, Node>> setds;
 
-	size_t col = BOARD_SIZE - 1;
+	//map of predecessors node(x, y)
+	std::map<Node, Node> path;
+
+	//map of distance to node(x, y), distance
+	std::map<Node, int> dist;
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			dist[Node(i, j)] = INT_MAX;
+			path[Node(i, j)] = Node(-1, -1);
+		}
+	}
+	//map of nodes, from node(x,y)	to list his neighbor nodes(x,y) distance
+	std::map<Node, std::list<std::pair<Node, int>>> map;
+	for (int i = 0; i < BOARD_SIZE; i++)
+	{
+		for (int j = 0; j < BOARD_SIZE; j++)
+		{
+			if (canMove(Node(i, j - 1)))
+			{
+				map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i, j - 1), 1));
+			}
+			if (canMove(Node(i, j + 1)))
+			{
+				map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i, j + 1), 1));
+			}
+			if (canMove(Node(i + 1, j)))
+			{
+				map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i + 1, j), 1));
+			}
+			if (canMove(Node(i - 1, j)))
+			{
+				map[std::make_pair(i, j)].push_back(std::make_pair(std::make_pair(i - 1, j), 1));
+			}
+		}
+	}
+
+	setds.insert(std::make_pair(0, from));
+	dist[from] = 0;
+
+	while (!setds.empty())
+	{
+		std::pair<int, Node> tmp = *(setds.begin());
+		setds.erase(setds.begin());
+
+		Node u = tmp.second;
+
+		std::list<std::pair<Node, int>>::iterator i;
+		for (i = map[u].begin(); i != map[u].end(); ++i)
+		{
+			Node v = (*i).first;
+			int weight = (*i).second;
+
+			if (dist[v] > dist[u] + weight)
+			{
+				if (dist[v] != INT_MAX)
+				{
+					setds.erase(setds.find(std::make_pair(dist[v], v)));
+				}
+				dist[v] = dist[u] + weight;
+				path[v] = u;
+				setds.insert(std::make_pair(dist[v], v));
+			}
+		}
+	}
+
+	Node n;
+	if (dist[dest] == INT_MAX)
+	{	// jeœli cel jest nieosi¹galny
+		return std::make_pair(ERROR_DIRECTION, -1);
+	}
+	else {
+		n = dest;
+	}
+
+	Node prev;
+	std::pair<Direction, int> prevprev;
 
 	while (true)
 	{
-		list.push_back(WEST);
-		addDirectionsToList(list, NORTH, BOARD_SIZE - 2);
-		list.push_back(WEST);
-		addDirectionsToList(list, SOUTH, BOARD_SIZE - 2);
-
-		col = col - 2;
-
-		if (BOARD_SIZE % 2 == 0 && col == 1)
+		prev = Node(path[n]);
+		if (prev == Node(-1, -1))
 		{
-			list.push_back(WEST);
-			addDirectionsToList(list, NORTH, BOARD_SIZE - 1);
-			break;
+			return prevprev;
 		}
-		if (BOARD_SIZE % 2 == 1 && col == 2)
-		{
-			list.push_back(WEST);
-			if (food == Node(1, 1))
-			{
-				list.push_back(NORTH);
-				list.push_back(WEST);
-				list.push_back(NORTH);
-
-				for (int i = 0; i < (BOARD_SIZE - 3) / 2; i++)
-				{
-					list.push_back(EAST);
-					list.push_back(NORTH);
-					list.push_back(WEST);
-					list.push_back(NORTH);
-				}
-			}
-			else
-			{
-				for (int i = 0; i < (BOARD_SIZE - 3) / 2; i++)
-				{
-					list.push_back(EAST);
-					list.push_back(NORTH);
-					list.push_back(WEST);
-					list.push_back(NORTH);
-				}
-
-				list.push_back(WEST);
-				list.push_back(NORTH);
-				list.push_back(NORTH);
-			}
-			break;
-		}
+		prevprev = std::make_pair(getDirection(prev, n), dist[dest]);
+		n = prev;
 	}
 }
 
-void Snake::addDirectionsToList(std::list<Direction>& list, Direction dir, size_t count)
+void Snake::addDirectionsToList(std::list<Direction>& list, const Direction &dir, const size_t &count)
 {
 	for (size_t i = 0; i < count; i++)
 	{
@@ -192,7 +232,7 @@ void Snake::addDirectionsToList(std::list<Direction>& list, Direction dir, size_
 	}
 }
 
-Move Snake::addNode(Node n)
+Move Snake::addNode(const Node &n)
 {
 	nodes.insert(nodes.begin(), n);
 	head = nodes.front();
@@ -221,10 +261,14 @@ void Snake::randomFood() {
 	{
 		for (size_t j = 0; j < Snake::BOARD_SIZE; j++)
 		{
-			auto search = set.find(std::make_pair(i, j));
-			if (search == set.end())
+			Node node = std::make_pair(i, j);
+			if (node != tail)
 			{
-				v.push_back(Node(i, j));
+				auto search = set.find(node);
+				if (search == set.end())
+				{
+					v.push_back(Node(i, j));
+				}
 			}
 		}
 	}
@@ -232,28 +276,36 @@ void Snake::randomFood() {
 	{
 		food = v.at(random(0, v.size()));
 	}
+	else
+	{
+		food = Node(-1, -1);
+	}
 }
 
-Move Snake::move(Direction dir)
+Move Snake::move(const Direction &dir)
 {
+	if (food == Node(-1, -1))
+	{
+		return COLLISION;
+	}
 	Move move;
 	if (dir == NORTH) {
-		Node n = Node(head.x, head.y - 1);
+		Node n = Node(head.first, head.second - 1);
 		move = addNode(n);
 	}
 	else if (dir == EAST)
 	{
-		Node n = Node(head.x + 1, head.y);
+		Node n = Node(head.first + 1, head.second);
 		move = addNode(n);
 	}
 	else if (dir == SOUTH)
 	{
-		Node n = Node(head.x, head.y + 1);
+		Node n = Node(head.first, head.second + 1);
 		move = addNode(n);
 	}
 	else if (dir == WEST)
 	{
-		Node n = Node(head.x - 1, head.y);
+		Node n = Node(head.first - 1, head.second);
 		move = addNode(n);
 	}
 	else
@@ -263,12 +315,14 @@ Move Snake::move(Direction dir)
 	return move;
 }
 
-bool Snake::canMove(Direction dir)
+bool Snake::canMove(const Direction &dir)
 {
+	Node n;
 	if (dir == NORTH)
 	{
-		auto search = set.find(std::make_pair(head.x, head.y - 1));
-		if (search != set.end() || head.y - 1 < 0)
+		n = getNeighbor(head, NORTH);
+		auto search = set.find(n);
+		if (search != set.end() || n.second < 0)
 		{
 			return false;
 		}
@@ -276,8 +330,9 @@ bool Snake::canMove(Direction dir)
 	}
 	else if (dir == EAST)
 	{
-		auto search = set.find(std::make_pair(head.x + 1, head.y));
-		if (search != set.end() || head.x + 1 >= Snake::BOARD_SIZE)
+		n = getNeighbor(head, EAST);
+		auto search = set.find(n);
+		if (search != set.end() || n.first >= Snake::BOARD_SIZE)
 		{
 			return false;
 		}
@@ -285,8 +340,9 @@ bool Snake::canMove(Direction dir)
 	}
 	else if (dir == SOUTH)
 	{
-		auto search = set.find(std::make_pair(head.x, head.y + 1));
-		if (search != set.end() || head.y + 1 >= Snake::BOARD_SIZE)
+		n = getNeighbor(head, SOUTH);
+		auto search = set.find(n);
+		if (search != set.end() || n.second >= Snake::BOARD_SIZE)
 		{
 			return false;
 		}
@@ -294,8 +350,9 @@ bool Snake::canMove(Direction dir)
 	}
 	else if (dir == WEST)
 	{
-		auto search = set.find(std::make_pair(head.x - 1, head.y));
-		if (search != set.end() || head.x - 1 < 0)
+		n = getNeighbor(head, WEST);
+		auto search = set.find(n);
+		if (search != set.end() || n.first < 0)
 		{
 			return false;
 		}
@@ -304,50 +361,18 @@ bool Snake::canMove(Direction dir)
 	return false;
 }
 
-//							Node(x,y)
-bool Snake::canMove(std::pair<int, int> node, Direction dir)
+bool Snake::canMove(const Node & node)
 {
 	if (node.first < 0 || node.first >= BOARD_SIZE || node.second < 0 || node.second >= BOARD_SIZE)
 	{
 		return false;
 	}
-	if (dir == NORTH)
+	auto search = set.find(node);
+	if (search != set.end())
 	{
-		auto search = set.find(std::make_pair(node.first, node.second - 1));
-		if (search != set.end() || node.second - 1 < 0)
-		{
-			return false;
-		}
-		return true;
+		return false;
 	}
-	else if (dir == EAST)
-	{
-		auto search = set.find(std::make_pair(node.first + 1, node.second));
-		if (search != set.end() || node.first + 1 >= Snake::BOARD_SIZE)
-		{
-			return false;
-		}
-		return true;
-	}
-	else if (dir == SOUTH)
-	{
-		auto search = set.find(std::make_pair(node.first, node.second + 1));
-		if (search != set.end() || node.second + 1 >= Snake::BOARD_SIZE)
-		{
-			return false;
-		}
-		return true;
-	}
-	else if (dir == WEST)
-	{
-		auto search = set.find(std::make_pair(node.first - 1, node.second));
-		if (search != set.end() || node.first - 1 < 0)
-		{
-			return false;
-		}
-		return true;
-	}
-	return false;
+	return true;
 }
 
 void Snake::updateSet()
@@ -355,7 +380,10 @@ void Snake::updateSet()
 	set.clear();
 	for (auto &node : this->nodes)
 	{
-		set.insert(std::make_pair(node.x, node.y));
+		if (node != tail)
+		{
+			set.insert(node);
+		}
 	}
 }
 
@@ -373,10 +401,4 @@ void Snake::saveData()
 		outfile << "\n" << score << ";" << timeToString(time, std::chrono::high_resolution_clock::now()) << ";" << movementCounter;
 		outfile.close();
 	}
-}
-
-const Node& Snake::getNullNode()
-{
-	static Node node(INT_MAX, INT_MAX);
-	return node;
 }
