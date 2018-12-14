@@ -1,5 +1,8 @@
 #include "astarsolver.h"
 
+AStarSolver::AStarSolver() {
+	counter = 0;
+}
 Move AStarSolver::nextMove(Snake * snake)
 {
 	Direction dir = aSearchForwardChecking(*snake, snake->food);
@@ -204,6 +207,10 @@ Direction AStarSolver::aSearchForwardChecking(Snake snake, const Node &dest)
 		}
 		else
 		{	//jeœli zjemy jab³uszko i nie bêdziemy mogli pod¹¿aæ za ogonem
+			if (snake.nodes.size() + 1 >= pow(Snake::BOARD_SIZE, 2))
+			{
+				return realTofood;
+			}
 			//pod¹¿aj za ogonem najd³u¿sz¹ œcie¿k¹
 			return snake.moveAway(snake.head, snake.tail);
 		}
@@ -211,11 +218,31 @@ Direction AStarSolver::aSearchForwardChecking(Snake snake, const Node &dest)
 	else
 	{	//jeœli nie mo¿emy pod¹¿aæ za jab³uszkiem
 		Direction realToTail = aSearch(snake, snake.tail);
+
 		if (realToTail == ERROR_DIRECTION)
 		{	//jeœli nie mo¿emy pod¹¿aæ za ogonem
 			//dozwolony ruch losowy
 			return snake.randomMove(snake.head);
 		}
+
+		Direction awayToTail = snake.moveAway(snake.head, snake.tail);
+		if (realToTail == awayToTail)
+		{
+			return realToTail;
+		}
+		else
+		{
+			if (counter < 3)
+			{
+				counter = 0;
+				return awayToTail;
+			}
+			else
+			{
+				counter++;
+			}
+		}
+
 		return realToTail;
 	}
 	return ERROR_DIRECTION;

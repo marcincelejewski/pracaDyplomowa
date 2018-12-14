@@ -8,6 +8,7 @@
 #include "ai/astarsolver.h"
 #include "util/movethread.h"
 
+#include <QtConcurrent/QtConcurrentRun>
 #include <QMainWindow>
 
 class SnakeWindow;
@@ -18,11 +19,12 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow();
+	static QString outFileName;
 
 private slots:
 	void handleButton();
 	void updateGUI(QString name, Move move, Snake snake);
-	void reloadStopwatch();
+	void reloadLabelsTime();
 
 signals:
 	void start();
@@ -32,7 +34,9 @@ private:
 	QMap<QString, QPair<MoveThread*, SnakeWindow*>> mapThreads;
 	QTimer timer;
 	QElapsedTimer stopwatch;
+
 	void closeEvent(QCloseEvent *event);
+	void saveData(QString name, Snake snake);
 };
 
 #endif // MAINWINDOW_H

@@ -3,7 +3,7 @@
 MainWindow::MainWindow()
 {
 	setWindowTitle(tr("Snake"));
-	connect(&timer, SIGNAL(timeout()), this, SLOT(reloadStopwatch()));
+	connect(&timer, SIGNAL(timeout()), this, SLOT(reloadLabelsTime()));
 
 	btnStart = new QPushButton("Start");
 	btnStart->setFont(QFont("Comic Sans MS", 16));
@@ -15,7 +15,7 @@ MainWindow::MainWindow()
 	mapThreads["random"] = qMakePair(new MoveThread("random", snake, new RandomSolver()), new SnakeWindow("Losowy"));
 	mapThreads["hamilton"] = qMakePair(new MoveThread("hamilton", snake, new HamiltonSolver()), new SnakeWindow("Hamilton"));
 	mapThreads["greedy"] = qMakePair(new MoveThread("greedy", snake, new GreedySolver()), new SnakeWindow("Zachlanny"));
-	mapThreads["a*"] = qMakePair(new MoveThread("a*", snake, new AStarSolver()), new SnakeWindow("A*"));
+	mapThreads["astar"] = qMakePair(new MoveThread("astar", snake, new AStarSolver()), new SnakeWindow("A*"));
 
 	QWidget *wdg = new QWidget(this);
 	QGridLayout *layout = new QGridLayout(wdg);
@@ -62,6 +62,8 @@ void MainWindow::updateGUI(QString name, Move move, Snake snake)
 {
 	if (move == COLLISION)
 	{
+		QFuture<void> future = QtConcurrent::run(this, &MainWindow::saveData, name, snake);
+
 		mapThreads[name].second->board->paintGameOver();
 		mapThreads[name].first->terminate();
 	}
@@ -71,6 +73,8 @@ void MainWindow::updateGUI(QString name, Move move, Snake snake)
 	}
 	else if (move == EATEN_FOOD)
 	{
+		QFuture<void> future = QtConcurrent::run(this, &MainWindow::saveData, name, snake);
+
 		mapThreads[name].second->board->paintSnake(snake);
 		mapThreads[name].second->board->paintFood(snake);
 		mapThreads[name].second->setScore(QString::number(snake.score));
@@ -83,7 +87,20 @@ void MainWindow::closeEvent(QCloseEvent * event)
 	exit(0);
 }
 
-void MainWindow::reloadStopwatch()
+void MainWindow::saveData(QString name, Snake snake)
+{
+	QStringList list = outFileName.split(".");
+
+	QFile file(list[0] + "_" + name + "." + list[1]);
+	if (file.open(QFile::Append | QFile::Text))
+	{
+		QTextStream out(&file);
+		out << "\n" << snake.score << ";" << (double)stopwatch.elapsed() / 1000 << ";" << snake.movementCounter;
+		file.close();
+	}
+}
+
+void MainWindow::reloadLabelsTime()
 {
 	QMapIterator<QString, QPair<MoveThread*, SnakeWindow*>> it(mapThreads);
 	while (it.hasNext())

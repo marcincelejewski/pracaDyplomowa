@@ -7,7 +7,7 @@
 class AStarSolver : public BaseSolver
 {
 public:
-	AStarSolver() {};
+	AStarSolver();
 	~AStarSolver() {};
 	virtual Move nextMove(Snake * snake) override;
 
@@ -15,6 +15,8 @@ public:
 	Direction bfs(Snake snake, const Node &dest);
 	Direction aSearchForwardChecking(Snake snake, const Node &dest);
 	int sumPair(const std::pair<int, int> &p);
+private:
+	size_t counter;
 };
 
 #endif // ASTARSOLVER_H

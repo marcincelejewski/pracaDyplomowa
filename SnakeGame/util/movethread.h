@@ -3,6 +3,7 @@
 
 #include "ai/basesolver.h"
 #include <QThread>
+#include <qelapsedtimer.h>
 
 class MoveThread : public QThread
 {
@@ -14,6 +15,7 @@ signals:
 public:
 	MoveThread(QString name, Snake snake, BaseSolver *solver);
 	Snake* getSnake();
+	static qint64 sleepTime;
 
 private:
 	void run() override;
@@ -21,6 +23,7 @@ private:
 	BaseSolver *solver;
 	QString name;
 	Snake snake;
+	QElapsedTimer stopwatch;
 };
 
 #endif // MOVETHREAD_H

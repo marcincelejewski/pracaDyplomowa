@@ -2,104 +2,111 @@
 #include "ui/snakeboard.h"
 
 #include <QApplication>
-#include <fstream>
 #include <sstream>
 
 size_t Snake::BOARD_SIZE;
 size_t SnakeBoard::boardPixelSize;
 size_t SnakeBoard::cellPixelSize;
-size_t SnakeBoard::sleepTime;
+qint64 MoveThread::sleepTime;
 double SnakeBoard::scaleRatio;
-std::string Snake::outFileName;
 
-static const std::string boardSizeName = "boardSize";
-static const std::string boardPixelSizeName = "boardPixelSize";
-static const std::string imagesSizeName = "imagesSize";
-static const std::string sleepTimeName = "sleepTime";
-static const std::string outFileName = "outFileName";
+QString MainWindow::outFileName;
+
+static const QString boardSizeName = "boardSize";
+static const QString boardPixelSizeName = "boardPixelSize";
+static const QString imagesSizeName = "imagesSize";
+static const QString sleepTimeName = "sleepTime";
+static const QString outFileName = "outFileName";
 
 void readConfig()
 {
-	std::ifstream file("../SnakeGame/config.properties");
-	if (file.is_open()) {
-		size_t imagesSize = 0;
-		std::string line;
-		while (getline(file, line)) {
-			std::remove_if(line.begin(), line.end(), isspace);
+	QFile file("../SnakeGame/config.properties");
+
+	if (file.open(QFile::ReadOnly | QFile::Text))
+	{
+		QTextStream in(&file);
+		size_t imagesSize;
+
+		while (!in.atEnd()) {
+			QString line = in.readLine();
+			line = line.simplified();
+			line.replace(" ", "");
 			if (line.at(0) != '#')
 			{
-				std::size_t index = line.find_first_of('=');
-				size_t value = 0;
-				if (line.substr(0, index) == boardSizeName)
+				QStringList list = line.split("=");
+
+				if (list.size() > 1)
 				{
-					std::stringstream buf(line.substr(index + 1, line.length()));
-					buf >> value;
-					if (value >= 5 && value <= 25)
+					if (list[0] == boardSizeName)
 					{
-						Snake::BOARD_SIZE = value;
+						size_t bufor = list[1].toInt();
+						if (bufor > 5 && bufor <= 25)
+						{
+							Snake::BOARD_SIZE = bufor;
+						}
+						else
+						{
+							Snake::BOARD_SIZE = 10;
+						}
+						qInfo() << (boardSizeName + " = " + QString::number(Snake::BOARD_SIZE));
 					}
-					else
+
+					else if (list[0] == boardPixelSizeName)
 					{
-						Snake::BOARD_SIZE = 10;
+						size_t bufor = list[1].toInt();
+						if (bufor > 250 && bufor <= 750)
+						{
+							SnakeBoard::boardPixelSize = bufor;
+						}
+						else
+						{
+							SnakeBoard::boardPixelSize = 450;
+						}
+						qInfo() << (boardPixelSizeName + " = " + QString::number(SnakeBoard::boardPixelSize));
 					}
-					qInfo() << (boardSizeName + " = " + std::to_string(Snake::BOARD_SIZE)).c_str();
-				}
-				else if (line.substr(0, index) == boardPixelSizeName)
-				{
-					std::stringstream buf(line.substr(index + 1, line.length()));
-					buf >> value;
-					if (value > 200 && value < 800)
+
+					else if (list[0] == imagesSizeName)
 					{
-						SnakeBoard::boardPixelSize = value;
+						size_t bufor = list[1].toInt();
+						if (bufor > 10 && bufor <= 100)
+						{
+							imagesSize = bufor;
+						}
+						else
+						{
+							imagesSize = 450;
+						}
+						qInfo() << (imagesSizeName + " = " + QString::number(imagesSize));
 					}
-					else
+
+					else if (list[0] == sleepTimeName)
 					{
-						SnakeBoard::boardPixelSize = 500;
+						qint64 bufor = list[1].toInt();
+						if (bufor > 50 && bufor <= 1000)
+						{
+							MoveThread::sleepTime = bufor;
+						}
+						else
+						{
+							MoveThread::sleepTime = 125;
+						}
+						qInfo() << (sleepTimeName + " = " + QString::number(MoveThread::sleepTime));
 					}
-					qInfo() << (boardPixelSizeName + " = " + std::to_string(SnakeBoard::boardPixelSize)).c_str();
-				}
-				else if (line.substr(0, index) == imagesSizeName)
-				{
-					std::stringstream buf(line.substr(index + 1, line.length()));
-					buf >> value;
-					if (value > 10 && value < 100)
+					else if (list[0] == outFileName)
 					{
-						imagesSize = value;
+						MainWindow::outFileName = list[1];
+						qInfo() << (outFileName + " = " + MainWindow::outFileName);
 					}
-					else
-					{
-						imagesSize = 50.0;
-					}
-					qInfo() << (imagesSizeName + " = " + std::to_string(imagesSize)).c_str();
-				}
-				else if (line.substr(0, index) == sleepTimeName)
-				{
-					std::stringstream buf(line.substr(index + 1, line.length()));
-					buf >> value;
-					if (value > 50 && value < 1000)
-					{
-						SnakeBoard::sleepTime = value;
-					}
-					else
-					{
-						SnakeBoard::sleepTime = 150;
-					}
-					qInfo() << (sleepTimeName + " = " + std::to_string(SnakeBoard::sleepTime)).c_str();
-				}
-				else if (line.substr(0, index) == outFileName)
-				{
-					std::stringstream buf(line.substr(index + 1, line.length()));
-					buf >> Snake::outFileName;
-					qInfo() << (outFileName + " = " + Snake::outFileName).c_str();
 				}
 			}
 		}
 		file.close();
+
 		SnakeBoard::cellPixelSize = SnakeBoard::boardPixelSize / Snake::BOARD_SIZE;
-		qInfo() << ("cellPixelSize = " + std::to_string(SnakeBoard::cellPixelSize)).c_str();
+		qInfo() << ("cellPixelSize = " + QString::number(SnakeBoard::cellPixelSize));
 
 		SnakeBoard::scaleRatio = double(SnakeBoard::cellPixelSize) / double(imagesSize);
-		qInfo() << ("scaleRatio = " + std::to_string(SnakeBoard::scaleRatio)).c_str();
+		qInfo() << ("scaleRatio = " + QString::number(SnakeBoard::scaleRatio));
 	}
 }
 

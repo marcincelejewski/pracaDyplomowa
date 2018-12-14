@@ -29,38 +29,36 @@ public:
 	Snake(const Snake &snake);
 	Snake();
 
-	Node getNode(const size_t &index) const;
-
 	Direction getHeadDirection() const;
 	Direction getTailDirection() const;
 	Direction randomMove(const Node &node);
 	Direction moveAway(const Node &from, const Node &dest);
-
 	std::pair<Direction, int> moveCloser(const Node &from, const Node &dest);
 
 	void addDirectionsToList(std::list<Direction> & list, const Direction &dir, const size_t &count);
-	void updateSet();
-	void randomFood();
 
 	Move move(const Direction &dir);
-	Move addNode(const Node &n);
 
 	bool canMove(const Direction &dir);
 	bool canMove(const Node &node);
+
+	Node getNode(const size_t &index) const;
 
 	Node head;
 	Node tail;
 	Node prevTail;
 	Node food;
 	static size_t BOARD_SIZE;
-	static std::string outFileName;
 	size_t score;
-	bool isGameOver;
-
 	size_t movementCounter;
-
+	bool isGameOver;
 	std::vector <Node> nodes;
+
+private:
 	std::unordered_set<std::pair<size_t, size_t>, pair_hash> set;
+	void updateSet();
+	void randomFood();
+	Move addNode(const Node &n);
 };
 
 inline std::size_t random(const std::size_t min, const std::size_t max)

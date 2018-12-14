@@ -19,19 +19,18 @@ void MoveThread::run()
 
 int MoveThread::exec()
 {
-	//board->timer->start(SnakeBoard::sleepTime / 10);
+	stopwatch.start();
 	Move move;
 	while (true)
 	{
-		//moveTime = std::chrono::high_resolution_clock::now();
-
+		stopwatch.restart();
 		move = solver->nextMove(&snake);
 		if (move == COLLISION)
 		{
 			snake.isGameOver = true;
 		}
 		emit(moveDone(name, move, snake));
-		msleep(100);
+		msleep(sleepTime - stopwatch.elapsed());
 
 		//msleep(sleepTime - board->getMoveTime());
 	}

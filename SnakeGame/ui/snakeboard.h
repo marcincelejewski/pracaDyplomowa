@@ -24,7 +24,6 @@ public:
 	void paintSnake(const Snake& snake);
 	void paintGameOver();
 
-	static size_t sleepTime;
 	static size_t boardPixelSize;
 	static size_t cellPixelSize;
 	static double scaleRatio;
